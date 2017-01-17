@@ -9,9 +9,9 @@ This is an attempt to promote SOLID SHACK architecture. Let's build a SOLID SHAC
     <a href='https://github.com/sgireddy/SHACKSparkBasics'> Part I </a> for implementation plan and our fictitious scenario "optimizing promo efficiency for ISellInstoreAndOnline.com". </b>
     <a href='https://github.com/sgireddy/SHACKSparkKafkaCassandra'>Part II for System Setup and Spark-Kafka-Cassandra Integration</a>    
 <h4> Module Structure </h4>     
-    1. Deep dive into Spark transformations <br />
+    1. Deep dive into Spark transformations
     2. RDD vs. DStream
-    2. Configure Hadoop in Pseudo Distributed Mode on CentOS 7 <br />
+    2. Configure Hadoop in Pseudo Distributed Mode on CentOS 7
     3. State Management
      
 <br />
@@ -125,6 +125,41 @@ Here is the output:
             ProductActivityByReferrer(1001,site,1484614793673,295,91,126)
 
 RDDs outperform Data Frames in most cases & provides us type safety, data frames bring us intuitive SQL syntax. 
+
+<h4>RDD vs. DStream</h4>
+
+<b>What is RDD</b> <br />
+RDD is an abstraction where its defined by (ref: kafka-exactly-once github) 
+1. A method to divide the work into partitions (getPartition)
+2. A method to do the work for a given partition (compute)
+3. A list of parent RDDs
+
+It make sense given RDD is a distributed data set where data is stored across nodes and we perform transformations & reductions. 
+
+<a>What is DStream</a> <br />
+
+In a simple sense a Discretised Stream is a continuous sequence of RDDs. Remember StreamingContext, 
+it takes SparkContext and duration as parameters for instantiation. DStream is a micro batch of RDDs bound to this duration. 
+
+DStream[T] contains 
+        
+        DStream[T]
+            generatedRDDs: HashMap[Time, RDD[T])
+            rememberDuration: Duration
+
+We can perform regular transformations (with some limitations) on DStream, where transformation on rdd[T] will result in DStream[T],
+DStream also comes with special transformations window, reduceByKeyAndWindow and special transformations that are responsible for maintaining state
+updateStateByKey, mapWithState. DStream also comes with another method foreachRDD where we could perform actions on RDD (like save, print) but can't generate a new RDD (i.e. returns Unit) <br />
+
+Here is the signature for the function transform, it takes a function where the function expects an RDD[T] as input and transforms into RDD[U], 
+final transformation itself returns DStream[U]
+
+        def transform[U]((RDD[T])=>RDD[U]):Dstream[U]
+
+Here is the signature for foreeachRDD, it expects a higher order function to do some stuff but returns a Unit.
+        
+        def foreachRDD((RDD[T]=>Unit):Unit
+        
 
 <h4>Spark Streaming & State Management</h4>
 Will walk through the code in a few hours... Please checkout the packages consumer & jobs
