@@ -162,6 +162,31 @@ Here is the signature for foreeachRDD, it expects a higher order function to do 
         
 
 <h4>Spark Streaming & State Management</h4>
+
+Spark uses window operations to maintain state, we need to define Window Size & Slide Interval. 
+Lets says each batch operation takes 4s, and we want to keep the data for 12s, then window size would be 12s (must multiples side interval)
+and slide interval defines how fast the window could move... a slide interval of 4s means that the window moves after each batch but it keeps two batches of data.
+
+NOte: Both window size and slide interval must be multiples of batch interval.
+
+        //NOTE pseudo code
+        Dstream.window(Duration(x), Duration(y)) where x is window size and y is slide interval
+        our standard RDD reduce function becomes
+        DStream.reduceByWindow((a,b) => a op b), windowinterval, slideinterval)
+
+UpdateStateByKey
+
+        //Note psedo code, will walk through real code later in this section....
+        updateStateByKey[T]((Seq[newvalues], currentState:T)=>Option(newState:T))
+
+MapWithState (update state and then optionally map to new type)
+        
+        //Note: pseudo code, will walk through real code later in this section....
+        mapWithState(StateType, MappedType](spec: StateSpec)
+        val spec = StateSpec.function(K, Option[V], currentState[T])=>Option[MappedType]
+                            .timeout(Seconds(10))
+
+
 Will walk through the code in a few hours... Please checkout the packages consumer & jobs
 
 <h4>Hadoop Configuration in pseudo distributed mode </h4>
